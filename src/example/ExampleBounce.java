@@ -3,11 +3,9 @@ package example;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -15,7 +13,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import java.util.Random;
 
 
 /**
@@ -32,10 +29,6 @@ public class ExampleBounce extends Application {
     public static final Paint BACKGROUND = Color.AZURE;
     public static final Paint HIGHLIGHT = Color.OLIVEDRAB;
     public static final String BOUNCER_IMAGE = "ball.gif";
-    public static final int BOUNCER_MIN_SPEED = -60;
-    public static final int BOUNCER_MAX_SPEED = 60;
-    public static final int BOUNCER_MIN_SIZE = 20;
-    public static final int BOUNCER_MAX_SIZE = 40;
     public static final Paint MOVER_COLOR = Color.PLUM;
     public static final int MOVER_SIZE = 50;
     public static final int MOVER_SPEED = 5;
