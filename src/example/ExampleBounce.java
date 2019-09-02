@@ -44,6 +44,7 @@ public class ExampleBounce extends Application {
     private ImageView myBouncer;
     private Rectangle myMover;
     private Rectangle myGrower;
+    private int myDirection;
 
 
     /**
@@ -57,8 +58,8 @@ public class ExampleBounce extends Application {
         stage.setTitle(TITLE);
         stage.show();
         // attach "game loop" to timeline to play it (basically just calling step() method repeatedly forever)
-        var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
-        var animation = new Timeline();
+        KeyFrame frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> step(SECOND_DELAY));
+        Timeline animation = new Timeline();
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.getKeyFrames().add(frame);
         animation.play();
@@ -74,6 +75,7 @@ public class ExampleBounce extends Application {
         // x and y represent the top left corner, so center it in window
         myBouncer.setX(width / 2 - myBouncer.getBoundsInLocal().getWidth() / 2);
         myBouncer.setY(height / 2 - myBouncer.getBoundsInLocal().getHeight() / 2);
+        myDirection = 1;
         myMover = new Rectangle(width / 2 - MOVER_SIZE / 2, height / 2 - 100, MOVER_SIZE, MOVER_SIZE);
         myMover.setFill(MOVER_COLOR);
         myGrower = new Rectangle(width / 2 - GROWER_SIZE / 2, height / 2 + 50, GROWER_SIZE, GROWER_SIZE);
@@ -94,7 +96,7 @@ public class ExampleBounce extends Application {
     // Note, there are more sophisticated ways to animate shapes, but these simple ways work fine to start
     private void step (double elapsedTime) {
         // update "actors" attributes
-        myBouncer.setX(myBouncer.getX() + BOUNCER_SPEED * elapsedTime);
+        myBouncer.setX(myBouncer.getX() + BOUNCER_SPEED * myDirection * elapsedTime);
         myMover.setRotate(myMover.getRotate() - 1);
         myGrower.setRotate(myGrower.getRotate() + 1);
 
@@ -115,6 +117,11 @@ public class ExampleBounce extends Application {
         }
         else {
             myGrower.setFill(GROWER_COLOR);
+        }
+
+        // bounce off the side walls
+        if (myBouncer.getX() < 0 || myBouncer.getX() > myScene.getWidth()) {
+            myDirection *= -1;
         }
     }
 
