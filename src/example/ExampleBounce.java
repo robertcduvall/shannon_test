@@ -3,6 +3,7 @@ package example;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -14,6 +15,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import java.util.Random;
 
 
 /**
@@ -30,7 +32,8 @@ public class ExampleBounce extends Application {
     public static final Paint BACKGROUND = Color.AZURE;
     public static final Paint HIGHLIGHT = Color.OLIVEDRAB;
     public static final String BOUNCER_IMAGE = "ball.gif";
-    public static final int BOUNCER_SPEED = 30;
+    public static final int BOUNCER_MIN_SPEED = 20;
+    public static final int BOUNCER_MAX_SPEED = 40;
     public static final Paint MOVER_COLOR = Color.PLUM;
     public static final int MOVER_SIZE = 50;
     public static final int MOVER_SPEED = 5;
@@ -44,7 +47,8 @@ public class ExampleBounce extends Application {
     private ImageView myBouncer;
     private Rectangle myMover;
     private Rectangle myGrower;
-    private int myDirection;
+    private Point2D myVelocity;
+    private Random dice = new Random();
 
 
     /**
@@ -75,7 +79,8 @@ public class ExampleBounce extends Application {
         // x and y represent the top left corner, so center it in window
         myBouncer.setX(width / 2 - myBouncer.getBoundsInLocal().getWidth() / 2);
         myBouncer.setY(height / 2 - myBouncer.getBoundsInLocal().getHeight() / 2);
-        myDirection = 1;
+        myVelocity = new Point2D(getRandomSpeed(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED),
+                                 getRandomSpeed(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED));
         myMover = new Rectangle(width / 2 - MOVER_SIZE / 2, height / 2 - 100, MOVER_SIZE, MOVER_SIZE);
         myMover.setFill(MOVER_COLOR);
         myGrower = new Rectangle(width / 2 - GROWER_SIZE / 2, height / 2 + 50, GROWER_SIZE, GROWER_SIZE);
@@ -96,7 +101,8 @@ public class ExampleBounce extends Application {
     // Note, there are more sophisticated ways to animate shapes, but these simple ways work fine to start
     private void step (double elapsedTime) {
         // update "actors" attributes
-        myBouncer.setX(myBouncer.getX() + BOUNCER_SPEED * myDirection * elapsedTime);
+        myBouncer.setX(myBouncer.getX() + myVelocity.getX() * elapsedTime);
+        myBouncer.setY(myBouncer.getY() + myVelocity.getY() * elapsedTime);
         myMover.setRotate(myMover.getRotate() - 1);
         myGrower.setRotate(myGrower.getRotate() + 1);
 
@@ -119,9 +125,12 @@ public class ExampleBounce extends Application {
             myGrower.setFill(GROWER_COLOR);
         }
 
-        // bounce off the side walls
-        if (myBouncer.getX() < 0 || myBouncer.getX() > myScene.getWidth()) {
-            myDirection *= -1;
+        // bounce off all the walls
+        if (myBouncer.getX() < 0 || myBouncer.getX() > myScene.getWidth() - myBouncer.getBoundsInLocal().getWidth()) {
+            myVelocity = new Point2D(-myVelocity.getX(), myVelocity.getY());
+        }
+        if (myBouncer.getY() < 0 || myBouncer.getY() > myScene.getHeight() - myBouncer.getBoundsInLocal().getHeight()) {
+            myVelocity = new Point2D(myVelocity.getX(), -myVelocity.getY());
         }
     }
 
@@ -157,6 +166,18 @@ public class ExampleBounce extends Application {
             myGrower.setScaleY(myGrower.getScaleY() * GROWER_RATE);
         }
     }
+
+    // Returns an "interesting", non-zero random value in the range (min, max) or (-min, -max)
+    private int getRandomSpeed (int min, int max) {
+        int result = min + dice.nextInt(max - min) + 1;
+        if (dice.nextBoolean()) {
+            return result;
+        }
+        else {
+            return -result;
+        }
+    }
+
 
     /**
      * Start the program.
