@@ -1,5 +1,7 @@
 package example;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -35,12 +37,12 @@ public class ExampleBounce extends Application {
     public static final Paint GROWER_COLOR = Color.BISQUE;
     public static final double GROWER_RATE = 1.1;
     public static final int GROWER_SIZE = 50;
-    
+    public static final int NUM_BOUNCERS = 50;
+
 
     // some things we need to remember during our game
     private Scene myScene;
-    private Bouncer myBouncer1;
-    private Bouncer myBouncer2;
+    private List<Bouncer> myBouncers;
     private Rectangle myMover;
     private Rectangle myGrower;
 
@@ -69,15 +71,17 @@ public class ExampleBounce extends Application {
         Group root = new Group();
         // make some shapes and set their properties
         Image image = new Image(this.getClass().getClassLoader().getResourceAsStream(BOUNCER_IMAGE));
-        myBouncer1 = new Bouncer(image, width, height);
-        myBouncer2 = new Bouncer(image, width, height);
+        myBouncers = new ArrayList<>();
+        for (int k = 0; k < NUM_BOUNCERS; k++) {
+            Bouncer b = new Bouncer(image, width, height);
+            myBouncers.add(b);
+            root.getChildren().add(b.getView());
+        }
         myMover = new Rectangle(width / 2 - MOVER_SIZE / 2, height / 2 - 100, MOVER_SIZE, MOVER_SIZE);
         myMover.setFill(MOVER_COLOR);
         myGrower = new Rectangle(width / 2 - GROWER_SIZE / 2, height / 2 + 50, GROWER_SIZE, GROWER_SIZE);
         myGrower.setFill(GROWER_COLOR);
         // order added to the group is the order in which they are drawn
-        root.getChildren().add(myBouncer1.getView());
-        root.getChildren().add(myBouncer2.getView());
         root.getChildren().add(myMover);
         root.getChildren().add(myGrower);
         // create a place to see the shapes
@@ -92,8 +96,9 @@ public class ExampleBounce extends Application {
     // Note, there are more sophisticated ways to animate shapes, but these simple ways work fine to start
     private void step (double elapsedTime) {
         // update "actors" attributes
-        myBouncer1.move(elapsedTime);
-        myBouncer2.move(elapsedTime);
+        for (Bouncer b : myBouncers) {
+            b.move(elapsedTime);
+        }
         myMover.setRotate(myMover.getRotate() - 1);
         myGrower.setRotate(myGrower.getRotate() + 1);
 
@@ -109,17 +114,21 @@ public class ExampleBounce extends Application {
             myMover.setFill(MOVER_COLOR);
         }
         // with images can only check bounding box
-        if (myGrower.getBoundsInParent().intersects(myBouncer1.getView().getBoundsInParent()) ||
-            myGrower.getBoundsInParent().intersects(myBouncer2.getView().getBoundsInParent())) {
-            myGrower.setFill(HIGHLIGHT);
+        var hit = false;
+        for (Bouncer b : myBouncers) {
+            if (myGrower.getBoundsInParent().intersects(b.getView().getBoundsInParent())) {
+                myGrower.setFill(HIGHLIGHT);
+                hit = true;
+            }
         }
-        else {
+        if (! hit) {
             myGrower.setFill(GROWER_COLOR);
         }
 
         // bounce off all the walls
-        myBouncer1.bounce(myScene.getWidth(), myScene.getHeight());
-        myBouncer2.bounce(myScene.getWidth(), myScene.getHeight());
+        for (Bouncer b : myBouncers) {
+            b.bounce(myScene.getWidth(), myScene.getHeight());
+        }
     }
 
     // What to do each time a key is pressed
