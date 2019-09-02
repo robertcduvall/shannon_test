@@ -46,13 +46,10 @@ public class ExampleBounce extends Application {
 
     // some things we need to remember during our game
     private Scene myScene;
-    private ImageView myBouncer1;
-    private ImageView myBouncer2;
+    private Bouncer myBouncer1;
+    private Bouncer myBouncer2;
     private Rectangle myMover;
     private Rectangle myGrower;
-    private Point2D myVelocity1;
-    private Point2D myVelocity2;
-    private Random dice = new Random();
 
 
     /**
@@ -79,19 +76,15 @@ public class ExampleBounce extends Application {
         Group root = new Group();
         // make some shapes and set their properties
         Image image = new Image(this.getClass().getClassLoader().getResourceAsStream(BOUNCER_IMAGE));
-        myBouncer1 = makeBouncer(image, width, height);
-        myVelocity1 = new Point2D(getRandomInRange(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED),
-                                  getRandomInRange(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED));
-        myBouncer2 = makeBouncer(image, width, height);
-        myVelocity2 = new Point2D(getRandomInRange(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED),
-                                  getRandomInRange(BOUNCER_MIN_SPEED, BOUNCER_MAX_SPEED));
+        myBouncer1 = new Bouncer(image, width, height);
+        myBouncer2 = new Bouncer(image, width, height);
         myMover = new Rectangle(width / 2 - MOVER_SIZE / 2, height / 2 - 100, MOVER_SIZE, MOVER_SIZE);
         myMover.setFill(MOVER_COLOR);
         myGrower = new Rectangle(width / 2 - GROWER_SIZE / 2, height / 2 + 50, GROWER_SIZE, GROWER_SIZE);
         myGrower.setFill(GROWER_COLOR);
         // order added to the group is the order in which they are drawn
-        root.getChildren().add(myBouncer1);
-        root.getChildren().add(myBouncer2);
+        root.getChildren().add(myBouncer1.getView());
+        root.getChildren().add(myBouncer2.getView());
         root.getChildren().add(myMover);
         root.getChildren().add(myGrower);
         // create a place to see the shapes
@@ -106,8 +99,8 @@ public class ExampleBounce extends Application {
     // Note, there are more sophisticated ways to animate shapes, but these simple ways work fine to start
     private void step (double elapsedTime) {
         // update "actors" attributes
-        moveBouncer(myBouncer1, myVelocity1, elapsedTime);
-        moveBouncer(myBouncer2, myVelocity2, elapsedTime);
+        myBouncer1.move(elapsedTime);
+        myBouncer2.move(elapsedTime);
         myMover.setRotate(myMover.getRotate() - 1);
         myGrower.setRotate(myGrower.getRotate() + 1);
 
@@ -123,8 +116,8 @@ public class ExampleBounce extends Application {
             myMover.setFill(MOVER_COLOR);
         }
         // with images can only check bounding box
-        if (myGrower.getBoundsInParent().intersects(myBouncer1.getBoundsInParent()) ||
-            myGrower.getBoundsInParent().intersects(myBouncer2.getBoundsInParent())) {
+        if (myGrower.getBoundsInParent().intersects(myBouncer1.getView().getBoundsInParent()) ||
+            myGrower.getBoundsInParent().intersects(myBouncer2.getView().getBoundsInParent())) {
             myGrower.setFill(HIGHLIGHT);
         }
         else {
@@ -132,8 +125,8 @@ public class ExampleBounce extends Application {
         }
 
         // bounce off all the walls
-        myVelocity1 = bounceOffWalls(myBouncer1, myVelocity1, myScene);
-        myVelocity2 = bounceOffWalls(myBouncer2, myVelocity2, myScene);
+        myBouncer1.bounce(myScene.getWidth(), myScene.getHeight());
+        myBouncer2.bounce(myScene.getWidth(), myScene.getHeight());
     }
 
     // What to do each time a key is pressed
@@ -167,41 +160,6 @@ public class ExampleBounce extends Application {
             myGrower.setScaleX(myGrower.getScaleX() * GROWER_RATE);
             myGrower.setScaleY(myGrower.getScaleY() * GROWER_RATE);
         }
-    }
-
-    // Returns an "interesting", non-zero random value in the range (min, max) or (-min, -max)
-    private int getRandomInRange (int min, int max) {
-        return min + dice.nextInt(max - min) + 1;
-    }
-
-    // Create a bouncer from a given image
-    private ImageView makeBouncer (Image image, int screenWidth, int screenHeight) {
-        ImageView result = new ImageView(image);
-        // make sure it stays a circle
-        int size = getRandomInRange(BOUNCER_MIN_SIZE, BOUNCER_MAX_SIZE);
-        result.setFitWidth(size);
-        result.setFitHeight(size);
-        // make sure it stays within the bounds
-        result.setX(getRandomInRange(size,  screenWidth - size));
-        result.setY(getRandomInRange(size, screenHeight - size));
-        return result;
-    }
-
-    // Move a bouncer based on its velocity
-    private void moveBouncer (ImageView bouncer, Point2D velocity, double elapsedTime) {
-        bouncer.setX(bouncer.getX() + velocity.getX() * elapsedTime);
-        bouncer.setY(bouncer.getY() + velocity.getY() * elapsedTime);
-    }
-
-    // Return velocity that may be updated if bounce occurred
-    private Point2D bounceOffWalls (ImageView bouncer, Point2D velocity, Scene scene) {
-        if (bouncer.getX() < 0 || bouncer.getX() > scene.getWidth() - bouncer.getBoundsInLocal().getWidth()) {
-            velocity = new Point2D(-velocity.getX(), velocity.getY());
-        }
-        if (bouncer.getY() < 0 || bouncer.getY() > scene.getHeight() - bouncer.getBoundsInLocal().getHeight()) {
-            velocity = new Point2D(velocity.getX(), -velocity.getY());
-        }
-        return velocity;
     }
 
 
