@@ -1,5 +1,7 @@
 package example;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.animation.KeyFrame;
@@ -30,7 +32,7 @@ public class ExampleBounce extends Application {
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final Paint BACKGROUND = Color.AZURE;
     public static final Paint HIGHLIGHT = Color.OLIVEDRAB;
-    public static final String BOUNCER_IMAGE = "ball.gif";
+    public static final String BOUNCER_IMAGE = "resources/ball.gif";
     public static final Paint MOVER_COLOR = Color.PLUM;
     public static final int MOVER_SIZE = 50;
     public static final int MOVER_SPEED = 5;
@@ -70,13 +72,16 @@ public class ExampleBounce extends Application {
         // create one top level collection to organize the things in the scene
         Group root = new Group();
         // make some shapes and set their properties
-        Image image = new Image(this.getClass().getClassLoader().getResourceAsStream(BOUNCER_IMAGE));
-        myBouncers = new ArrayList<>();
-        for (int k = 0; k < NUM_BOUNCERS; k++) {
-            Bouncer b = new Bouncer(image, width, height);
-            myBouncers.add(b);
-            root.getChildren().add(b.getView());
+        try {
+	        Image image = new Image(new FileInputStream(BOUNCER_IMAGE));
+	        myBouncers = new ArrayList<>();
+	        for (int k = 0; k < NUM_BOUNCERS; k++) {
+	            Bouncer b = new Bouncer(image, width, height);
+	            myBouncers.add(b);
+	            root.getChildren().add(b.getView());
+	        }
         }
+	    catch (FileNotFoundException e) {}
         myMover = new Rectangle(width / 2 - MOVER_SIZE / 2, height / 2 - 100, MOVER_SIZE, MOVER_SIZE);
         myMover.setFill(MOVER_COLOR);
         myGrower = new Rectangle(width / 2 - GROWER_SIZE / 2, height / 2 + 50, GROWER_SIZE, GROWER_SIZE);
@@ -114,7 +119,7 @@ public class ExampleBounce extends Application {
             myMover.setFill(MOVER_COLOR);
         }
         // with images can only check bounding box
-        var hit = false;
+        boolean hit = false;
         for (Bouncer b : myBouncers) {
             if (myGrower.getBoundsInParent().intersects(b.getView().getBoundsInParent())) {
                 myGrower.setFill(HIGHLIGHT);
